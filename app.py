@@ -28,14 +28,48 @@ product = st.sidebar.text_input('produto','')
 #carregar os dados 
 data = load_data(start_data=start_data,end_data=end_data,product=product)
 
-st.title('análise de vendas')
+tab = st.selectbox('Escolha Uma ABA',[
+                  'Tabela Com Dados',
+                  'Gráfico De Vendas',] 
+                   )
+if tab == 'Tabela Com Dados':
+    st.title('análise de vendas')
+    st.subheader('dataset de vendas')
+    st.dataframe(data,use_container_width=True)
+    #exportando dados para csv
+    st.subheader('exportar dados para csv')
+    csv = data.to_csv(index=False)
+    st.download_button(
+        label='baixar dados como csv',
+        data=csv,
+        file_name='dados_vendas.csv',
+        mime='text/csv'
+    )
+    
+elif tab == 'Gráfico De Vendas':
+    
 
-st.subheader('dataset de vendas')
-st.dataframe(data,use_container_width=True)
-st.subheader('gráfico de vendas')
-fig,ax = plt.subplots()
-data['data'] = pd.to_datetime(data['data'])
-data.groupby('data')['quantidade'].sum().plot(ax=ax)
-ax.set_xlabel('data')
-ax.set_ylabel('quantidade vendida')
-st.pyplot(fig)
+    #grafico de vendas
+
+    st.subheader('gráfico de vendas por data ')
+    fig,ax = plt.subplots()
+    data['data'] = pd.to_datetime(data['data'])
+    data.groupby('data')['quantidade'].sum().plot(ax=ax)
+    ax.set_xlabel('data')
+    ax.set_ylabel('quantidade vendida')
+    st.pyplot(fig)
+
+    #grafico (vendas/produto)
+
+    st.subheader('gráfico de vendas por produto')
+    product_sales = data.groupby('produto')['quantidade'].sum().reset_index()
+    fig2,ax2 = plt.subplots()
+    product_sales.plot(
+        kind='bar',x='produto',
+        y='quantidade',ax=ax2
+    )
+    ax2.set_xlabel('produto')
+    ax2.set_ylabel('quantidde vendida')
+    ax2.set_title('vendas por produto')
+    st.pyplot(fig2)
+
